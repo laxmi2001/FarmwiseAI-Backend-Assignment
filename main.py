@@ -1,94 +1,57 @@
-from flask import Flask, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from flask_bcrypt import Bcrypt
-import sqlite3
-
-# from flask_jwt_extended import JWTManager, jwt_required, create_access_token
-
-conn = sqlite3.connect('instance/books.db')
+from flask import Flask, jsonify, request
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///books.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# app.config['JWT_SECRET_KEY'] = 'your-secret-key'
 
-db = SQLAlchemy(app)
-bcrypt = Bcrypt(app)
+# Sample data (you can replace this with a database)
+ans = {"operation_code":1}
+data1 = []
 
+# GET request to fetch all items
+@app.route('/bhfl',methods=['GET', 'POST'])
+def api():
 
+    if request.method == 'POST':
+        try:
+            data = request.get_json()
 
-# jwt = JWTManager(app)
+            # Extracting data from the JSON request
+            user_id = 'madanagopal_chandrasekhar_16062002'
+            college_email = 'madanagopal.c2020@vitstudent.ac.in'
+            college_roll_number = '20BCE0602'
+            in_list = data.get('data',[])
+            alphabet_array = []
+            number_array = []
 
-class Book(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    author = db.Column(db.String(100), nullable=False)
-    isbn = db.Column(db.String(13), unique=True, nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)
+            for item in in_list:
+                if item.isalpha():
+                    alphabet_array.append(item)
+                elif item.isdigit():
+                    number_array.append(item)
 
+            # Finding the highest alphabet in the alphabet_array
+            highest_alphabet = max(alphabet_array, key=lambda x: x.lower())
 
-with app.app_context():
-    db.create_all()
+            response = {
+                'status': 'Success',
+                'user_id': user_id,
+                'college_email_id': college_email,
+                'college_roll_number': college_roll_number,
+                'number_array': number_array,
+                'alphabet_array': alphabet_array,
+                'highest_alphabet': highest_alphabet
+            }
 
+            return jsonify(response), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 400
+    
+    
+    
+    elif request.method == 'GET':
 
-@app.route('/books', methods=['POST'])
-# @jwt_required()
-def add_book():
-    data = request.get_json()
-    new_book = Book(title=data['title'], author=data['author'], isbn=data['isbn'], price=data['price'],
-                    quantity=data['quantity'])
-    db.session.add(new_book)
-    db.session.commit()
-    return jsonify({'message': 'Book added successfully'})
-    print("Some out")
-
-
-@app.route('/books', methods=['GET'])
-# @jwt_required()
-def get_all_books():
-    books = Book.query.all()
-    result = []
-    for book in books:
-        book_data = {'title': book.title, 'author': book.author, 'isbn': book.isbn, 'price': book.price,
-                     'quantity': book.quantity}
-        result.append(book_data)
-    return jsonify(result)
-
-
-@app.route('/books/<isbn>', methods=['GET'])
-# @jwt_required()
-def get_book(isbn):
-    book = Book.query.filter_by(isbn=isbn).first()
-    if book:
-        book_data = {'title': book.title, 'author': book.author, 'isbn': book.isbn, 'price': book.price,
-                     'quantity': book.quantity}
-        return jsonify(book_data)
-    return jsonify({'message': 'Book not found'})
+        return jsonify(ans)
 
 
-@app.route('/books/<isbn>', methods=['PUT'])
-# @jwt_required()
-def update_book(isbn):
-    book = Book.query.filter_by(isbn=isbn).first()
-    if book:
-        data = request.get_json()
-        book.title = data['title']
-        book.author = data['author']
-        book.price = data['price']
-        book.quantity = data['quantity']
-        db.session.commit()
-        return jsonify({'message': 'Book updated successfully'})
-    return jsonify({'message': 'Book not found'})
-    print("Some out")
 
-
-@app.route('/books/<isbn>', methods=['DELETE'])
-# @jwt_required()
-def delete_book(isbn):
-    book = Book.query.filter_by(isbn=isbn).first()
-    if book:
-        db.session.delete(book)
-        db.session.commit()
-        return jsonify({'message': 'Book deleted successfully'})
-    return jsonify({'message': 'Book not found'})
+if __name__ == '__main__':
+    app.run(debug=True)

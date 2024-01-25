@@ -39,7 +39,8 @@ def add_book():
                     quantity=data['quantity'])
     db.session.add(new_book)
     db.session.commit()
-    return jsonify({'message': 'Book added successfully'})
+    # return jsonify({'message': 'Book added successfully'})
+    return render_template('index.html')
 
 
 @app.route('/books', methods=['GET'])

@@ -79,6 +79,7 @@ def update_book(isbn):
         db.session.commit()
         return jsonify({'message': 'Book updated successfully'})
     return jsonify({'message': 'Book not found'})
+    print("Some out")
 
 
 @app.route('/books/<isbn>', methods=['DELETE'])
